@@ -1,6 +1,7 @@
 package com.android.face.utils;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.hardware.Camera;
 
 import java.text.SimpleDateFormat;
@@ -118,5 +119,47 @@ public class Utils {
         }else
             return 0;
     }
+
+
+    public static void setCameraParams(Camera mCamera,int x,int y){
+
+        Point screenResolution = new Point(x, y);
+        Camera.Size previewSize = CameraUtils.findBestPreviewSizeValue(screenResolution, mCamera);
+        Camera.Parameters mParams = mCamera.getParameters();
+        List<String> supportedFlashModes = mParams.getSupportedFocusModes();
+        if (supportedFlashModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+            mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        } else if (supportedFlashModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+            mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        } else if (supportedFlashModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+            mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+        }
+        int[] minFps = new int[1], maxFps = new int[1];
+        determineCameraPreviewFpsRange(mParams, minFps, maxFps);
+        mParams.setPreviewFpsRange(minFps[0], maxFps[0]);
+        mParams.setPreviewSize(previewSize.width, previewSize.height);
+        mCamera.setParameters(mParams);
+    }
+
+    private static void determineCameraPreviewFpsRange(Camera.Parameters parameters, int[] minFps, int[] maxFps) {
+        final int MAX_FPS = 30 * 1000;
+        List<int[]> frameRates = parameters.getSupportedPreviewFpsRange();
+        minFps[0] = 0;
+        for (int[] intArr : frameRates) {
+            if (minFps[0] == 0) {
+                minFps[0] = intArr[Camera.Parameters.PREVIEW_FPS_MIN_INDEX];
+                maxFps[0] = intArr[Camera.Parameters.PREVIEW_FPS_MAX_INDEX];
+                continue;
+            }
+            if (intArr[Camera.Parameters.PREVIEW_FPS_MAX_INDEX] <= MAX_FPS) {
+                if (intArr[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] >= minFps[0] &&
+                        intArr[Camera.Parameters.PREVIEW_FPS_MAX_INDEX] >= maxFps[0]) {
+                    minFps[0] = intArr[Camera.Parameters.PREVIEW_FPS_MIN_INDEX];
+                    maxFps[0] = intArr[Camera.Parameters.PREVIEW_FPS_MAX_INDEX];
+                }
+            }
+        }
+    }
+
 
 }

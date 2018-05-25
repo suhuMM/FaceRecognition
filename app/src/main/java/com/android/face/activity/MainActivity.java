@@ -253,10 +253,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 // 设定配置参数并开启预览
                 //mCamera.setParameters(parameters); // 将Camera.Parameters设定予Camera
                 //回调
+
+                Utils.setCameraParams(mCamera,1080,1920);
                 mCamera.addCallbackBuffer(bytes);
                 mCamera.setPreviewCallbackWithBuffer(this);
-
-                mCamera.startPreview(); // 打开预览画面
+                mCamera.startPreview();
                 mCamera.cancelAutoFocus();
 
                 //设置相机对焦
