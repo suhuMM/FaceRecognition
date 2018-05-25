@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">FaceRecognition</string>
+    <string name="db_manager">底库管理</string>
+</resources>
